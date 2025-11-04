@@ -86,10 +86,10 @@ class BurkinaHeritageRAGSimple:
         with open(self.corpus_path, 'r', encoding='utf-8') as f:
             full_corpus = json.load(f)
         
-        # OPTIMISATION MAXIMALE: Limiter à 300 documents pour réduire mémoire
-        max_docs = 300
+        # OPTIMISATION ULTRA pour Render Free (512MB RAM): Limiter à 100 documents
+        max_docs = 100
         if len(full_corpus) > max_docs:
-            print(f"⚠️  Limitation à {max_docs} documents (au lieu de {len(full_corpus)}) pour optimisation mémoire")
+            print(f"⚠️  Limitation à {max_docs} documents (au lieu de {len(full_corpus)}) pour optimisation mémoire Render Free")
             self.corpus = full_corpus[:max_docs]
         else:
             self.corpus = full_corpus
@@ -184,8 +184,8 @@ class BurkinaHeritageRAGSimple:
         """
         print("🔄 Indexation des documents...")
         
-        # OPTIMISATION MAXIMALE: Réduire la taille des batches à 20
-        batch_size = 20  # Réduit de 50 à 20 pour économie mémoire maximale
+        # OPTIMISATION ULTRA pour Render Free: Réduire la taille des batches à 10
+        batch_size = 10  # Réduit de 20 à 10 pour Render Free (512MB RAM)
         
         for i in range(0, len(self.corpus), batch_size):
             batch = self.corpus[i:i + batch_size]
@@ -697,6 +697,18 @@ Que voulez-vous savoir ? 🤔"""
         print(f"\n❓ Question: {question}")
         if conversation_history:
             print(f"📜 Historique: {len(conversation_history)} messages")
+        
+        # OPTIMISATION: Gérer les salutations et questions simples AVANT Gemini
+        question_lower = question.lower().strip()
+        simple_greetings = ["bonjour", "salut", "bonsoir", "coucou", "hey", "hello", "hi"]
+        
+        if question_lower in simple_greetings or any(g == question_lower for g in simple_greetings):
+            print("👋 Salutation détectée - Réponse directe")
+            return {
+                "question": question,
+                "answer": "Bonjour ! 👋 Je suis BurkinaHeritage, votre assistant culturel sur le Burkina Faso. Comment puis-je vous aider aujourd'hui ? 😊",
+                "sources": []
+            }
         
         # Déterminer si on recherche dans la BD
         needs_db = self._needs_database_search(question)

@@ -66,42 +66,30 @@ print("=" * 70 + "\n")
 
 rag_system = None
 rag_loading = False
-rag_init_started = False
 
 def init_rag_sync():
     """Initialise le RAG de manière synchrone."""
-    global rag_system, rag_loading, rag_init_started
+    global rag_system, rag_loading
     
-    if rag_init_started:
+    if rag_system is not None:
         return
     
-    rag_init_started = True
     rag_loading = True
     
     try:
-        print("🔄 Initialisation du RAG...")
+        print("🔄 Initialisation du RAG au démarrage...")
         rag_system = BurkinaHeritageRAGSimple()
         print("\n✅ RAG initialisé avec succès!\n")
     except Exception as e:
         print(f"\n❌ Erreur lors de l'initialisation du RAG: {e}\n")
+        import traceback
+        traceback.print_exc()
     finally:
         rag_loading = False
 
-# Middleware pour initialiser le RAG à la première requête
-@app.middleware("http")
-async def init_rag_middleware(request, call_next):
-    """Initialise le RAG à la première requête si pas encore fait."""
-    global rag_system, rag_init_started
-    
-    # Initialiser à la première requête (sauf health check)
-    if not rag_init_started and not request.url.path.endswith("/health"):
-        # Lancer l'initialisation en arrière-plan
-        import threading
-        thread = threading.Thread(target=init_rag_sync)
-        thread.start()
-    
-    response = await call_next(request)
-    return response
+# Initialiser le RAG immédiatement au démarrage du module
+print("🚀 Lancement de l'initialisation du RAG...")
+init_rag_sync()
 
 
 # Modèles Pydantic pour la validation des données
