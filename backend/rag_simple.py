@@ -96,8 +96,8 @@ class BurkinaHeritageRAGSimple:
         
         print(f"✅ {len(self.corpus)} documents chargés")
         
-        # Initialiser ChromaDB avec embeddings ULTRA-LÉGERS
-        # OPTIMISATION MAXIMALE: Utiliser SentenceTransformer directement (plus léger que ONNX)
+        # Initialiser ChromaDB avec embeddings RAPIDES
+        # OPTIMISATION: Utiliser DefaultEmbeddingFunction (modèle pré-installé avec ChromaDB)
         print("🗄️  Initialisation de ChromaDB...")
         
         # Configuration allégée pour environnements à faible mémoire
@@ -113,11 +113,8 @@ class BurkinaHeritageRAGSimple:
             settings=settings
         )
         
-        # OPTIMISATION: Utiliser SentenceTransformerEmbeddingFunction (plus léger que default ONNX)
-        # Utilise directement sentence-transformers sans la surcouche ONNX Runtime
-        self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
-        )
+        # OPTIMISATION: DefaultEmbeddingFunction = ONNX pré-installé (pas de téléchargement)
+        self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
         
         # Configuration des LLMs (ordre de priorité)
         # 1. Gemini API (Google)
