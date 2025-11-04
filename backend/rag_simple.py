@@ -88,8 +88,21 @@ class BurkinaHeritageRAGSimple:
         print(f"✅ {len(self.corpus)} documents chargés")
         
         # Initialiser ChromaDB avec embeddings par défaut
+        # OPTIMISATION: Désactiver telemetry et logging pour économiser la mémoire
         print("🗄️  Initialisation de ChromaDB...")
-        self.chroma_client = chromadb.PersistentClient(path=str(self.chroma_dir))
+        
+        # Configuration allégée pour environnements à faible mémoire
+        import chromadb.config
+        settings = chromadb.config.Settings(
+            anonymized_telemetry=False,
+            allow_reset=True,
+            is_persistent=True
+        )
+        
+        self.chroma_client = chromadb.PersistentClient(
+            path=str(self.chroma_dir),
+            settings=settings
+        )
         
         # Utiliser l'embedding function par défaut de ChromaDB
         self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
@@ -150,18 +163,21 @@ class BurkinaHeritageRAGSimple:
         """
         Indexe tous les documents du corpus dans ChromaDB.
         
-        Les documents sont traités par batch de 100 pour optimiser les performances.
-        Chaque document est transformé en embedding vectoriel et stocké avec ses métadonnées.
+        OPTIMISÉ pour environnements à faible mémoire (512 MB).
+        Les documents sont traités par petits batches de 50 au lieu de 100.
         
         Process:
-            1. Diviser le corpus en batches
+            1. Diviser le corpus en batches de 50
             2. Pour chaque batch : extraire texte, métadonnées et IDs
             3. Ajouter à la collection ChromaDB
-            4. Afficher la progression
+            4. Libérer la mémoire entre chaque batch
+            5. Afficher la progression
         """
         print("🔄 Indexation des documents...")
         
-        batch_size = 100
+        # OPTIMISATION: Réduire la taille des batches pour économiser la mémoire
+        batch_size = 50  # Réduit de 100 à 50
+        
         for i in range(0, len(self.corpus), batch_size):
             batch = self.corpus[i:i + batch_size]
             
@@ -183,6 +199,11 @@ class BurkinaHeritageRAGSimple:
                 metadatas=metadatas,
                 ids=ids
             )
+            
+            # OPTIMISATION: Libérer la mémoire entre les batches
+            del documents, metadatas, ids, batch
+            import gc
+            gc.collect()
             
             print(f"  ✓ {min(i + batch_size, len(self.corpus))}/{len(self.corpus)} indexés")
         
