@@ -1,0 +1,51 @@
+============================================================
+SOURCES - BurkinaHeritage RAG System
+Culture et Patrimoine du Burkina Faso
+============================================================
+
+Date de génération: 04/11/2025 03:16
+Nombre total de documents: 386
+Sources web uniques: 40
+
+------------------------------------------------------------
+CATÉGORIES:
+------------------------------------------------------------
+
+  • burkina-faso: 39 documents
+  • culture: 134 documents
+  • général: 168 documents
+  • patrimoine-culturel: 41 documents
+  • éducation: 4 documents
+
+------------------------------------------------------------
+SOURCES WEB (échantillon):
+------------------------------------------------------------
+
+1. http://cinqcontinents.geo.unibuc.ro/13/13_28_Sanogo.pdf
+2. https://arxiv.org/html/2406.08605v1
+3. https://beep.ird.fr/greenstone/collect/upb/index/assoc/UFRST-2014-KIE-IDE/UFRST-2014-KIE-IDE.pdf
+4. https://bibliovirtuelle.u-naziboni.bf/biblio/opac_css/docnume/idr/agriculture2/IDR-2014-POU-INV.pdf
+5. https://bibliovirtuelle.u-naziboni.bf/biblio/opac_css/docnume/idr/environnement/IDR-2016-TAP-CON.pdf
+6. https://forum.jellyfin.org/t-37-themes
+7. https://forum.jellyfin.org/t-can-t-reset-password--1235
+8. https://forum.jellyfin.org/t-from-disc-to-drive-a-beginner-s-guide-to-preparing-your-media-for-jellyfin
+9. https://forum.jellyfin.org/t-how-do-i-find-my-jellyfin-address
+10. https://forum.jellyfin.org/t-install-jellyfin-onto-tizan-easy
+11. https://forum.jellyfin.org/t-is-jellyfin-really-so-much-better-than-plex
+12. https://forum.jellyfin.org/t-samsung-smart-tv
+13. https://forum.jellyfin.org/t-solved-cannot-log-in
+14. https://forum.jellyfin.org/t-trickplay
+15. https://ich.unesco.org/doc/src/45490-FR.pdf
+16. https://limechain.tech/blog/dao-voting-mechanisms-explained-2022-guide
+17. https://link.springer.com/article/10.1007/s10586-025-05746-7
+18. https://media.unesco.org/sites/default/files/webform/mhm001/burkinafaso_decret95493_freorof_0.pdf
+19. https://orbi.uliege.be/bitstream/2268/321984/2/Annexes.pdf
+20. https://pax.unesco.org/bfm/assessed-contrib/BF_ICH_2023.pdf
+
+... et 20 autres sources
+
+============================================================
+Tous les documents sont issus de sources
+sur la culture, l'histoire et le patrimoine
+du Burkina Faso.
+============================================================
