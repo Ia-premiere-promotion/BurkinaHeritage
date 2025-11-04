@@ -100,19 +100,44 @@ frontend/
 
 ## 🔌 Configuration API
 
-L'application se connecte au backend FastAPI sur `http://localhost:8000` par défaut.
+L'application utilise des **variables d'environnement** pour se connecter au backend FastAPI.
 
-Pour changer l'URL de l'API, modifiez `src/services/api.js` :
+### Configuration automatique
+
+1. **Développement local** : Copiez `.env.example` en `.env`
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Modifiez l'URL** dans `.env` :
+   ```env
+   VITE_API_BASE_URL=http://localhost:8000
+   VITE_API_TIMEOUT=30000
+   ```
+
+3. **Production** : Modifiez `.env.production` avec votre URL de production :
+   ```env
+   VITE_API_BASE_URL=https://api.votre-domaine.com
+   ```
+
+### Variables d'environnement disponibles
+
+| Variable | Description | Défaut |
+|----------|-------------|--------|
+| `VITE_API_BASE_URL` | URL du backend API | `http://localhost:8000` |
+| `VITE_API_TIMEOUT` | Timeout des requêtes (ms) | `30000` |
+
+> 📖 **Guide complet** : Consultez [DEPLOYMENT.md](./DEPLOYMENT.md) pour plus de détails sur le déploiement.
+
+### Configuration avancée
+
+Le fichier `src/services/api.js` utilise automatiquement ces variables :
 
 ```javascript
-const API_BASE_URL = 'http://localhost:8000';
-```
-
-Ou utilisez une variable d'environnement :
-
-```bash
-# Créer un fichier .env
-echo "VITE_API_URL=http://localhost:8000" > .env
+const API_CONFIG = {
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000
+};
 ```
 
 ## 🎨 Personnalisation des Styles

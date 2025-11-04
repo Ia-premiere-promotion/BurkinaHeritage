@@ -3,15 +3,16 @@
  * Gère toutes les communications avec le backend FastAPI
  */
 
+// Configuration depuis les variables d'environnement
 const API_CONFIG = {
-  baseURL: 'http://localhost:8000',
+  baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
   endpoints: {
     chat: '/api/chat',
     health: '/api/health',
     stats: '/api/stats',
     clear: '/api/clear'
   },
-  timeout: 30000 // 30 secondes
+  timeout: parseInt(import.meta.env.VITE_API_TIMEOUT) || 30000 // 30 secondes
 };
 
 /**
