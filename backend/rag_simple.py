@@ -377,6 +377,7 @@ TA MISSION :
 RÉPONSE (naturelle et sympathique) :"""
         
         # Méthode 1: GEMINI API (PRIORITÉ)
+        gemini_error_message = None
         if self.gemini_client:
             try:
                 response = self.gemini_client.models.generate_content(
@@ -389,13 +390,30 @@ RÉPONSE (naturelle et sympathique) :"""
                     print(f"✅ Réponse générée par Gemini ({context_status})")
                     return answer
             except Exception as e:
+                error_str = str(e)
                 print(f"⚠️  Erreur Gemini API: {e}")
+                
+                # Déterminer le type d'erreur et créer un message approprié
+                if "503" in error_str or "overloaded" in error_str.lower():
+                    gemini_error_message = "⚠️ Le service d'IA est temporairement surchargé. Veuillez réessayer dans quelques instants."
+                elif "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                    gemini_error_message = "⚠️ Limite d'utilisation atteinte. Veuillez réessayer dans quelques minutes."
+                elif "401" in error_str or "unauthorized" in error_str.lower() or "api key" in error_str.lower():
+                    gemini_error_message = "⚠️ Problème de configuration de l'API. Veuillez contacter l'administrateur."
+                elif "network" in error_str.lower() or "connection" in error_str.lower():
+                    gemini_error_message = "⚠️ Problème de connexion réseau. Veuillez vérifier votre connexion internet et réessayer."
+                else:
+                    gemini_error_message = "⚠️ Le service d'IA est temporairement indisponible. Veuillez réessayer ultérieurement."
         
         # Fallback si Gemini échoue
         if has_context:
             # Si on a du contexte mais Gemini a échoué, utiliser le fallback intelligent
             print("⚠️  Utilisation du fallback avec contexte")
-            return self._fallback_answer(context_docs, question)
+            fallback_answer = self._fallback_answer(context_docs, question)
+            # Ajouter le message d'erreur au début si Gemini a échoué
+            if gemini_error_message:
+                return f"{gemini_error_message}\n\nVoici les informations que j'ai trouvées dans ma base de données :\n\n{fallback_answer}"
+            return fallback_answer
         else:
             # NOUVEAU : Essayer de chercher avec des termes plus généraux
             print("⚠️  Pas de contexte trouvé, recherche élargie...")
@@ -425,10 +443,15 @@ RÉPONSE (naturelle et sympathique) :"""
             
             if expanded_docs:
                 print(f"✅ Trouvé {len(expanded_docs)} documents généraux")
-                return self._fallback_answer(expanded_docs[:5], question)
+                fallback_answer = self._fallback_answer(expanded_docs[:5], question)
+                # Ajouter le message d'erreur au début si Gemini a échoué
+                if gemini_error_message:
+                    return f"{gemini_error_message}\n\nVoici des informations générales sur le Burkina Faso :\n\n{fallback_answer}"
+                return fallback_answer
             else:
                 print("⚠️  Aucun document trouvé même avec recherche élargie")
-                return "Désolé, je n'ai pas d'information sur ce sujet dans ma base de données. Posez-moi des questions sur la culture, l'histoire, les traditions, l'artisanat ou l'architecture du Burkina Faso. Par exemple : 'Qu'est-ce que le SIAO ?', 'Parle-moi du FESPACO', 'Qui est Thomas Sankara ?'"
+                error_prefix = f"{gemini_error_message}\n\n" if gemini_error_message else ""
+                return f"{error_prefix}Désolé, je n'ai pas d'information sur ce sujet dans ma base de données. Posez-moi des questions sur la culture, l'histoire, les traditions, l'artisanat ou l'architecture du Burkina Faso. Par exemple : 'Qu'est-ce que le SIAO ?', 'Parle-moi du FESPACO', 'Qui est Thomas Sankara ?'"
     
     def _fallback_answer(self, context_docs: List[Dict], question: str = "") -> str:
         """

@@ -13,14 +13,23 @@ function ChatMessage({ message }) {
   // Séparer le texte et les sources si présentes
   let mainText = message.text;
   let sources = [];
+  let warningMessage = null;
   
   if (isAI && message.text) {
+    // Détecter les messages d'avertissement (commence par ⚠️)
+    const warningMatch = message.text.match(/^(⚠️[^\n]+)/);
+    if (warningMatch) {
+      warningMessage = warningMatch[1];
+      // Retirer le warning du texte principal
+      mainText = message.text.substring(warningMatch[0].length).trim();
+    }
+    
     // Chercher la section "Sources utilisées :" dans le texte
-    const sourcesMatch = message.text.match(/Sources utilisées\s*:\s*([\s\S]*?)$/i);
+    const sourcesMatch = mainText.match(/Sources utilisées\s*:\s*([\s\S]*?)$/i);
     
     if (sourcesMatch) {
       // Extraire le texte avant les sources
-      mainText = message.text.substring(0, sourcesMatch.index).trim();
+      mainText = mainText.substring(0, sourcesMatch.index).trim();
       
       // Extraire les sources (lignes commençant par - ou •)
       const sourcesText = sourcesMatch[1];
@@ -56,6 +65,11 @@ function ChatMessage({ message }) {
           </span>
           <span className="message-time">{message.timestamp}</span>
         </div>
+        {warningMessage && (
+          <div className="message-warning">
+            {warningMessage}
+          </div>
+        )}
         <div className="message-text">
           {mainText}
         </div>
