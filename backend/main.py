@@ -283,16 +283,21 @@ async def clear_conversation():
 
 # Point d'entrée pour lancer le serveur
 if __name__ == "__main__":
+    import os
+    
+    # Récupérer le port depuis les variables d'environnement (pour Render, Railway, etc.)
+    port = int(os.getenv("PORT", 8000))
+    
     print("\n" + "=" * 70)
     print("🌍 Lancement du serveur BurkinaHeritage")
     print("=" * 70)
-    print("\n📡 API accessible sur: http://localhost:8000")
+    print(f"\n📡 API accessible sur: http://0.0.0.0:{port}")
     print("📚 Documentation: http://localhost:8000/docs")
     print("\n" + "=" * 70 + "\n")
     
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=8000,
+        port=port,
         log_level="info"
     )
