@@ -81,14 +81,23 @@ class BurkinaHeritageRAGSimple:
         
         print("🚀 Initialisation du système RAG BurkinaHeritage...")
         
-        # Charger le corpus
+        # Charger le corpus avec limite pour économiser la mémoire
         print(f"📚 Chargement du corpus: {self.corpus_path}")
         with open(self.corpus_path, 'r', encoding='utf-8') as f:
-            self.corpus = json.load(f)
+            full_corpus = json.load(f)
+        
+        # OPTIMISATION MAXIMALE: Limiter à 300 documents pour réduire mémoire
+        max_docs = 300
+        if len(full_corpus) > max_docs:
+            print(f"⚠️  Limitation à {max_docs} documents (au lieu de {len(full_corpus)}) pour optimisation mémoire")
+            self.corpus = full_corpus[:max_docs]
+        else:
+            self.corpus = full_corpus
+        
         print(f"✅ {len(self.corpus)} documents chargés")
         
-        # Initialiser ChromaDB avec embeddings par défaut
-        # OPTIMISATION: Désactiver telemetry et logging pour économiser la mémoire
+        # Initialiser ChromaDB avec embeddings ULTRA-LÉGERS
+        # OPTIMISATION MAXIMALE: Utiliser SentenceTransformer directement (plus léger que ONNX)
         print("🗄️  Initialisation de ChromaDB...")
         
         # Configuration allégée pour environnements à faible mémoire
@@ -104,8 +113,11 @@ class BurkinaHeritageRAGSimple:
             settings=settings
         )
         
-        # Utiliser l'embedding function par défaut de ChromaDB
-        self.embedding_function = embedding_functions.DefaultEmbeddingFunction()
+        # OPTIMISATION: Utiliser SentenceTransformerEmbeddingFunction (plus léger que default ONNX)
+        # Utilise directement sentence-transformers sans la surcouche ONNX Runtime
+        self.embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
+            model_name="all-MiniLM-L6-v2"
+        )
         
         # Configuration des LLMs (ordre de priorité)
         # 1. Gemini API (Google)
