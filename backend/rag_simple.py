@@ -163,20 +163,20 @@ class BurkinaHeritageRAGSimple:
         """
         Indexe tous les documents du corpus dans ChromaDB.
         
-        OPTIMISÉ pour environnements à faible mémoire (512 MB).
-        Les documents sont traités par petits batches de 50 au lieu de 100.
+        ULTRA-OPTIMISÉ pour environnements à très faible mémoire (512 MB).
+        Les documents sont traités par micro-batches de 20 au lieu de 50.
         
         Process:
-            1. Diviser le corpus en batches de 50
+            1. Diviser le corpus en micro-batches de 20
             2. Pour chaque batch : extraire texte, métadonnées et IDs
             3. Ajouter à la collection ChromaDB
-            4. Libérer la mémoire entre chaque batch
+            4. Libérer agressivement la mémoire entre chaque batch
             5. Afficher la progression
         """
         print("🔄 Indexation des documents...")
         
-        # OPTIMISATION: Réduire la taille des batches pour économiser la mémoire
-        batch_size = 50  # Réduit de 100 à 50
+        # OPTIMISATION MAXIMALE: Réduire la taille des batches à 20
+        batch_size = 20  # Réduit de 50 à 20 pour économie mémoire maximale
         
         for i in range(0, len(self.corpus), batch_size):
             batch = self.corpus[i:i + batch_size]
@@ -200,18 +200,22 @@ class BurkinaHeritageRAGSimple:
                 ids=ids
             )
             
-            # OPTIMISATION: Libérer la mémoire entre les batches
+            # OPTIMISATION MAXIMALE: Libérer agressivement la mémoire
             del documents, metadatas, ids, batch
             import gc
             gc.collect()
             
-            print(f"  ✓ {min(i + batch_size, len(self.corpus))}/{len(self.corpus)} indexés")
+            # Afficher progression réduite (tous les 100 docs)
+            if (i + batch_size) % 100 == 0 or (i + batch_size) >= len(self.corpus):
+                print(f"  ✓ {min(i + batch_size, len(self.corpus))}/{len(self.corpus)} indexés")
         
         print("✅ Indexation terminée!")
     
-    def search_documents(self, query: str, n_results: int = 5) -> List[Dict]:
+    def search_documents(self, query: str, n_results: int = 3) -> List[Dict]:
         """
         Recherche les documents les plus pertinents par similarité vectorielle.
+        
+        OPTIMISÉ: n_results=3 au lieu de 5 par défaut pour réduire la charge mémoire
         
         Utilise ChromaDB pour trouver les documents dont le contenu est sémantiquement
         proche de la requête. Filtre intelligemment par catégorie selon les mots-clés.
@@ -219,7 +223,7 @@ class BurkinaHeritageRAGSimple:
         
         Args:
             query (str): Question ou requête de l'utilisateur
-            n_results (int): Nombre de documents à retourner (défaut: 5)
+            n_results (int): Nombre de documents à retourner (défaut: 3, réduit de 5)
             
         Returns:
             List[Dict]: Liste des documents pertinents avec leur contenu et métadonnées
