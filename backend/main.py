@@ -26,12 +26,13 @@ Date : Novembre 2025
 Licence : Open Source
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import uvicorn
 from datetime import datetime
+import asyncio
 
 # Import du système RAG
 from rag_simple import BurkinaHeritageRAGSimple
@@ -46,10 +47,13 @@ app = FastAPI(
 )
 
 # Configuration CORS (Cross-Origin Resource Sharing)
-# Permet au frontend (localhost:5173) d'accéder à l'API (localhost:8000)
+# Permet au frontend (localhost:5173 ou Vercel) d'accéder à l'API
+import os
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En production, spécifier : ["http://localhost:5173"]
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],  # Autoriser GET, POST, DELETE, etc.
     allow_headers=["*"],  # Autoriser tous les headers
@@ -61,27 +65,25 @@ print("🚀 Démarrage du serveur BurkinaHeritage API")
 print("=" * 70 + "\n")
 
 rag_system = None
+rag_loading = False
 
-@app.on_event("startup")
-async def startup_event():
-    """
-    Événement de démarrage du serveur.
-    
-    Initialise le système RAG au lancement de l'API pour :
-    - Charger le corpus de documents
-    - Initialiser ChromaDB
-    - Préparer la collection vectorielle
-    
-    Raises:
-        Exception: Si l'initialisation du RAG échoue
-    """
-    global rag_system
+async def init_rag_background():
+    """Initialise le RAG en arrière-plan pour ne pas bloquer le démarrage."""
+    global rag_system, rag_loading
+    rag_loading = True
     try:
+        print("🔄 Initialisation du RAG en arrière-plan...")
         rag_system = BurkinaHeritageRAGSimple()
         print("\n✅ API prête à recevoir des requêtes!\n")
     except Exception as e:
         print(f"\n❌ Erreur lors de l'initialisation du RAG: {e}\n")
-        raise
+    finally:
+        rag_loading = False
+
+@app.on_event("startup")
+async def startup_event():
+    """Démarre l'initialisation du RAG en arrière-plan."""
+    asyncio.create_task(init_rag_background())
 
 
 # Modèles Pydantic pour la validation des données
@@ -194,6 +196,15 @@ async def root():
 @app.get("/api/health", response_model=HealthResponse, tags=["System"])
 async def health_check():
     """Vérifie l'état de santé du serveur"""
+    if rag_loading:
+        return {
+            "status": "initializing",
+            "message": "Système RAG en cours d'initialisation...",
+            "rag_initialized": False,
+            "total_documents": 0,
+            "timestamp": datetime.now().isoformat()
+        }
+    
     return {
         "status": "healthy" if rag_system else "error",
         "message": "Système RAG opérationnel" if rag_system else "RAG non initialisé",
@@ -238,8 +249,17 @@ async def chat(request: ChatRequest):
     - **n_results**: Nombre de documents à rechercher
     - **conversation_history**: Historique de la conversation
     """
+    if rag_loading:
+        raise HTTPException(
+            status_code=503, 
+            detail="Le système est en cours d'initialisation. Veuillez réessayer dans quelques instants."
+        )
+    
     if not rag_system:
-        raise HTTPException(status_code=503, detail="Système RAG non initialisé")
+        raise HTTPException(
+            status_code=503, 
+            detail="Système RAG non initialisé. Veuillez contacter l'administrateur."
+        )
     
     if not request.question or len(request.question.strip()) < 3:
         raise HTTPException(status_code=400, detail="Question trop courte")
