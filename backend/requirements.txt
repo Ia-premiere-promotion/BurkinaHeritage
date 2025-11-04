@@ -1,25 +1,22 @@
 # Backend RAG - BurkinaHeritage
-# Toutes les dépendances 100% Open Source
+# Dépendances réellement utilisées
 
 # API Framework
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
-python-multipart==0.0.6
 pydantic==2.5.0
 
 # Traitement PDF
 pypdf==3.17.1
-pdfplumber==0.10.3
-
-# RAG System - Embeddings
-sentence-transformers==2.2.2
-torch==2.1.0
 
 # RAG System - Vector Database
 chromadb==0.4.18
 
-# LLM (optionnel - pour usage local)
-transformers==4.35.0
+# Web Scraping
+beautifulsoup4==4.12.2
+
+# LLM - Google Gemini API
+google-genai==0.2.2
 
 # Utilitaires
 python-dotenv==1.0.0
