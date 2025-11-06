@@ -65,7 +65,8 @@ export async function sendMessage(question, useLLM = false, conversationHistory 
     let errorMessage = "Une erreur s'est produite. Veuillez réessayer.";
     
     if (error.name === 'AbortError') {
-      errorMessage = "⏱️ La requête a pris trop de temps. Le serveur est peut-être surchargé.";
+      errorMessage = "⏱️ La requête a pris trop de temps. Le serveur est peut-être surchargé.veuillez réessayer 5 minutes apres votre 1ère question le temps que le serveur se redemare";
+
     } else if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
       errorMessage = "🔌 Impossible de contacter le serveur. Vérifiez qu'il est démarré (port 8000).";
     } else if (error.message.includes('HTTP 500')) {
